@@ -39,9 +39,13 @@ class Dbh
     //Добавляем позицию,метод принимает текст позиции(content) как аргумент
     protected function addPosition($content)
     {
-        // $escape =  $this->conn->real_escape_string($content);
-        $sql = "INSERT INTO positions VALUES ('','$content')";
-        $this->connect()->query($sql);
+        $sql = 'SELECT * FROM positions';
+        $result = $this->connect()->query($sql);
+        $numRows = $result->num_rows;
+        if ($numRows <= 10) {
+            $sql = "INSERT INTO positions VALUES ('','$content')";
+            $this->connect()->query($sql);
+        }
     }
     //Удаляем позицию из БД,метод принимает id позиции(id) как аргумент
     protected function deletePosition($id)
@@ -52,7 +56,6 @@ class Dbh
     //Поиск позиций в БД по столбцу content
     protected function searchPosition($content)
     {
-        // $escape =  $this->conn->real_escape_string($content);
         $sql = "SELECT * FROM positions WHERE content LIKE '%$content%'";
         $result = $this->connect()->query($sql);
         $numRows = $result->num_rows;
