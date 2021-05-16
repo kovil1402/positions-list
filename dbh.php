@@ -32,8 +32,6 @@ class Dbh
                 $output[] = $row;
             }
             return $output;
-        } else {
-            header("HTTP/1.0 400 Bad Request");
         }
     }
     //Добавляем позицию,метод принимает текст позиции(content) как аргумент
