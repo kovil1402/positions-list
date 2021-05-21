@@ -5,6 +5,7 @@
  <b>Пример config.php:</b> <br>
 
 <?php <br>
+
 return [<br>
     'hostname' => '',<br>
     'username' => '',<br>
