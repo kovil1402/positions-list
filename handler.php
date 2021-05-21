@@ -1,33 +1,30 @@
 <?php
 
 require($_SERVER['DOCUMENT_ROOT'] . '/dbh.php');
+require($_SERVER['DOCUMENT_ROOT'] . '/positions.php');
 
-class Handler extends Dbh
-{
-    function __construct()
-    {
-        $this->getAction();
-    }
-    // Получаем get-параметр action чтобы понять что делать с запросом
-    public function getAction()
-    {
-        if ($_GET['action'] == '') {
-            header("HTTP/1.0 400 Bad Request");
-            die;
-        } else if ($_GET['action'] == 'getpositions') {
-            $output = $this->getAllPositions();
-            echo json_encode($output);
-        } else if ($_GET['action'] == 'addposition') {
-            $content = $_GET['content'];
-            $this->addPosition($content);
-        } else if ($_GET['action'] == 'getsearchpositions') {
-            $content = $_GET['content'];
-            $output = $this->searchPosition($content);
-            echo json_encode($output);
-        } else if ($_GET['action'] == 'deleteposition') {
-            $id = $_GET['id'];
-            $this->deletePosition($id);
-        }
-    }
+$config = require 'config.php';
+$dbh = new Dbh($config);
+$position = new Position($dbh);
+
+switch ($_GET['action']) {
+    case 'getpositions':
+        $output = $position->getAllPositions();
+        echo json_encode($output);
+        break;
+    case 'addposition':
+        $content = $_GET['content'];
+        $position->addPosition($content);
+        break;
+    case 'getsearchpositions':
+        $content = $_GET['content'];
+        $output = $position->searchPosition($content);
+        echo json_encode($output);
+        break;
+    case 'deleteposition':
+        $id = $_GET['id'];
+        $position->deletePosition($id);
+        break;
+    default:
+        header("HTTP/1.1 400 Bad Request");
 }
-$handler = new Handler;

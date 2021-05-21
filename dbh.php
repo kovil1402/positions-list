@@ -1,67 +1,43 @@
 <?php
 
 class Dbh
-{
-    private $hostname;
-    private $username;
-    private $password;
-    private $dbname;
+{   // Подключаем к БД
+    public $conn;
 
-    // Соеднияемся с БД
-    protected function  connect()
+    public function __construct($config)
     {
-        $this->hostname = 'localhost';
-        $this->username = 'victor';
-        $this->password = 'victor666';
-        $this->dbname = 'positions';
+        $this->conn = new mysqli($config['hostname'], $config['username'], $config['password'], $config['dbname']);
+        $this->conn->set_charset('utf8mb4');
+    }
+    public function preparedQuery($sql, $param)
+    {
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param('s',$param);
+        $stmt->execute();
+        return $stmt;
+    }
 
-        $conn = new mysqli($this->hostname, $this->username, $this->password, $this->dbname);
-        if ($conn->connect_error) {
-            exit('Ошибка подключения к базе данных!');
-        }
-        return $conn;
-    }
-    // Получаем все позциии из БД и возвращаем их в массиве $output если записей больше нуля
-    protected function getAllPositions()
+    public function selectResult($sql, $param = null)
     {
-        $sql = 'SELECT * FROM positions';
-        $result = $this->connect()->query($sql);
-        $numRows = $result->num_rows;
-        if ($numRows > 0) {
-            while ($row = $result->fetch_assoc()) {
-                $output[] = $row;
-            }
-            return $output;
+        if (!$param) {
+            return $this->conn->query($sql);
         }
+        return $this->preparedQuery($sql, $param)->get_result();
     }
-    //Добавляем позицию,метод принимает текст позиции(content) как аргумент
-    protected function addPosition($content)
+
+    public function selectAll($sql, $param = null)
     {
-        $sql = 'SELECT * FROM positions';
-        $result = $this->connect()->query($sql);
-        $numRows = $result->num_rows;
-        if ($numRows <= 10) {
-            $sql = "INSERT INTO positions VALUES ('','$content')";
-            $this->connect()->query($sql);
-        }
+        return $this->selectResult($sql, $param)->fetch_all(MYSQLI_ASSOC);
     }
-    //Удаляем позицию из БД,метод принимает id позиции(id) как аргумент
-    protected function deletePosition($id)
-    {
-        $sql = "DELETE FROM positions WHERE id = '$id'";
-        $this->connect()->query($sql);
+
+    public function getCount()
+    {   $row =  $this->selectResult('SELECT count(*) FROM positions')->fetch_all(MYSQLI_NUM);
+        $quantity = $row[0][0];
+        echo $quantity;
+        return $quantity;
     }
-    //Поиск позиций в БД по столбцу content
-    protected function searchPosition($content)
-    {
-        $sql = "SELECT * FROM positions WHERE content LIKE '%$content%'";
-        $result = $this->connect()->query($sql);
-        $numRows = $result->num_rows;
-        if ($numRows > 0) {
-            while ($row = $result->fetch_assoc()) {
-                $output[] = $row;
-            }
-            return $output;
-        }
-    }
+
+    
+
+    
 }
